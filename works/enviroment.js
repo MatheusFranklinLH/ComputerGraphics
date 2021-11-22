@@ -10,8 +10,8 @@ export class Block{
         this.initial = initial;
         this.passedBy = false;
 
-        var cubeGeometry = new THREE.BoxGeometry(9.8, 9.8, 0.3);
-        var cubeGeometry2 = new THREE.BoxGeometry(10, 10, 0.2);
+        var cubeGeometry = new THREE.BoxGeometry(9.8, 0.3, 9.8);
+        var cubeGeometry2 = new THREE.BoxGeometry(10, 0.2, 10);
         var cubeMaterial2 = new THREE.MeshPhongMaterial({color: "rgba(255, 0, 0)", side: THREE.DoubleSide,});
         if(initial){
             var cubeMaterial = new THREE.MeshPhongMaterial({color: "rgba(255, 126, 0)", side: THREE.DoubleSide,});
@@ -37,13 +37,16 @@ export class Block{
 export class Speedway{
     constructor(sideSize, type){
         this.xInitialBlock = 0;
-        this.yInitialBlock = -(sideSize*10)/2;
-        this.zInitialBlock = 0.1;
+        this.yInitialBlock = 0.1;
+        this.zInitialBlock = (sideSize*10)/2;
         this.sideSize = sideSize;
         this.type = type;
         this.blocks = [new Block(this.xInitialBlock, this.yInitialBlock, this.zInitialBlock, true)];
         this.xPos = this.xInitialBlock;
-        this.yPos = this.yInitialBlock;
+        this.zPos = this.zInitialBlock;
+        this.cornersX = [];
+        this.cornersZ = [];
+        this.piecesCount = 0;
         if(type == 1) this.createTrack1();
         if(type == 2) this.createTrack2();
     }
@@ -56,31 +59,43 @@ export class Speedway{
     {
         for(var i= 1; i<this.sideSize/2; i++){
             this.xPos -= 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
 
+        this.cornersX.push(this.xPos);
+        this.cornersZ.push(this.zPos);
+
         for(var i =1; i<this.sideSize; i++){
-            this.yPos += 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.zPos -= 10;
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
+        
+        this.cornersX.push(this.xPos);
+        this.cornersZ.push(this.zPos);
 
         for(var i =1; i<this.sideSize; i++){
             this.xPos += 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
 
+        this.cornersX.push(this.xPos);
+        this.cornersZ.push(this.zPos);
+
         for(var i =1; i<this.sideSize; i++){
-            this.yPos -= 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.zPos += 10;
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
+
+        this.cornersX.push(this.xPos);
+        this.cornersZ.push(this.zPos);
 
         for(var i =2; i<this.sideSize/2; i++){
             this.xPos -= 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
         if(this.sideSize%2 == 0){
             this.xPos -= 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
     }
 
@@ -88,37 +103,37 @@ export class Speedway{
     {        
         for(var i =1; i<this.sideSize/2; i++){
             this.xPos -= 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
         
         for(var i =1; i<this.sideSize; i++){
-            this.yPos += 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.zPos += 10;
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
 
         for(var i =1; i<this.sideSize/2; i++){
             this.xPos += 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
 
         for(var i =1; i<this.sideSize/2; i++){
-            this.yPos -= 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.zPos -= 10;
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
 
         for(var i =1; i<this.sideSize/2; i++){
             this.xPos += 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
 
         for(var i =1; i<this.sideSize/2; i++){
-            this.yPos -= 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.zPos -= 10;
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
 
         for(var i =2; i<this.sideSize/2; i++){
             this.xPos -= 10;
-            this.addBlock(this.xPos, this.yPos, this.zInitialBlock, false);
+            this.addBlock(this.xPos, this.yInitialBlock, this.zPos, false);
         }
     }
 }
@@ -224,14 +239,14 @@ export class Stopwatch{
 }
 
 
-export function finishLap(blocks) {
+/*export function finishLap(blocks) {
     var finishedLap = true;
     blocks.forEach(function(block){
         if(block.passedBy == false)
         finishedLap = false;
     })
     return finishedLap;
-}
+}*/
 /*
 export function createTrack1(numBlocksPerSide) 
 {
