@@ -7,6 +7,8 @@ export class Car{
     this.group = new THREE.Group();
     this.lap = 0;
     this.cornersPassed = [false];
+    this.cornerCount = 0;
+    this.lapFlag = true;
     for(var i=1; i<numSides; i++) this.speedwaySides.push(false);
     if(type == 1){
       this.body = createCube(5.0, 15.0, 3.0, 20.0, 20.0, 20.0, false);
@@ -22,7 +24,17 @@ export class Car{
       this.placeCar1();
 
     }else{//Implements the type 2 car
-
+      this.body = createCube(5.0, 15.0, 3.0, 20.0, 20.0, 20.0, false);
+      this.ceiling = createCube(5.0, 10.0, 2.0, 20, 20, 20, false); // Adding the ceiling of the car
+      this.axis1 = createCylinder(0.3, 0.3, 7.0, 10, 10, false);
+      this.axis2 = createCylinder(0.3, 0.3, 7.0, 10, 10, false);
+      this.roda1 = createTorus(2.0, 1.0, 40, 40, Math.PI * 2);
+      this.roda2 = createTorus(2.0, 1.0, 40, 40, Math.PI * 2);
+      this.roda3 = createTorus(2.0, 1.0, 40, 40, Math.PI * 2);
+      this.roda4 = createTorus(2.0, 1.0, 40, 40, Math.PI * 2);
+      this.airfoil = createCube(5.0, 1.0, 2.0, 20, 20, 20, false); // Adding airfoil
+      this.visor = createCube(5.0, 0.2, 2.0, 20, 20, 20, true); // Adding the visor
+      this.placeCar2();
     }
 
     this.group.add( this.body );
@@ -38,11 +50,9 @@ export class Car{
   }
 
   placeInitialPosition(sideSize){
-    //this.group.translateY(-(sideSize*10)/2);
-    this.group.translateZ((sideSize*10)/2);
-    this.group.translateY(2.3);
+    this.group.translateZ((sideSize*20)/2);
+    this.group.translateY(2);
     this.group.rotateY(degreesToRadians(-90));
-    //this.group.rotateZ(degreesToRadians(-90))
   }
 
   placeCar1(){
@@ -65,11 +75,30 @@ export class Car{
 
   }
 
+  placeCar2(){
+    this.body.rotateX(degreesToRadians(90));
+    this.body.position.set(0.0, 0.5, 0.0)
+    this.ceiling.rotateX(degreesToRadians(90));
+    this.ceiling.position.set(0.0, 3.0, -2.0);
+    this.axis1.rotateZ(degreesToRadians(90));
+    this.axis1.position.set(0.0, -1.0, 4.0);
+    this.axis2.rotateZ(degreesToRadians(90));
+    this.axis2.position.set(0.0, -1.0, -4.0);
+    this.roda1.position.set( 3.5, -1.0, 4.0);
+    this.roda2.position.set(-3.5, -1.0, 4.0);
+    this.roda3.position.set(3.5, -1.0, -4.0);
+    this.roda4.position.set(-3.5, -1.0, -4.0);
+    this.airfoil.rotateX(degreesToRadians(90));
+    this.airfoil.position.set(0.0, 2.0, -7.0);
+    this.visor.rotateX(degreesToRadians(90));
+    this.visor.position.set(0.0, 3.0, 3.1);
+  }
+
   isOnTheSpeedway(speedway){
     var isOnTheWay = false;
     var g = this.group;
     speedway.blocks.forEach(function(block){
-        if((g.position.x >= block.x - 5 && g.position.x <= block.x + 5) && (g.position.z >= block.z - 5 && g.position.z <= block.z + 5)){
+        if((g.position.x >= (block.x - (speedway.blockSize*0.5)) && g.position.x <= (block.x + (speedway.blockSize*0.5))) && (g.position.z >= (block.z - (speedway.blockSize*0.5)) && g.position.z <= (block.z + (speedway.blockSize*0.5)))){
             isOnTheWay = true;
             block.passedBy = true;
         }
@@ -84,44 +113,106 @@ export class Car{
   }
 
   movement(speedway){
-    var cornerCount = 0;
-    var lapFlag = true;
-    
-    if(this.hasPassedRightWay(cornerCount)){
-      //console.log("Fisrt if");
-      if(this.hitCorner(cornerCount, speedway)){
-        console.log("Hit Corner");
-        cornerCount++;
+        
+    console.log("Has Passed: " + this.hasPassedRightWay());
+    console.log("Lap: " + this.lap);
+    if(this.hasPassedRightWay()){
+      
+      if(this.hitCorner(speedway)){
+        console.log("Hit Corner:" + this.cornerCount );
+        this.cornersPassed[this.cornerCount] = true;
+        this.cornerCount +=1;
+        this.lapFlag = true;
       }else{
-        if(cornerCount == speedway.cornersX.length && lapFlag && this.hitFinishLine()){
+        console.log("cornerCount == cornersX.length: " + (this.cornerCount == speedway.cornersX.length) );
+        console.log("lapFlag: " + this.lapFlag);
+        console.log("hitFinish: " + this.hitFinishLine(speedway));
+        if( (this.cornerCount == speedway.cornersX.length) && this.lapFlag && this.hitFinishLine(speedway)){
           console.log("Hit finish line");
           this.lap++;
-          lapFlag = false;
+          console.log(this.lap);
+          this.updateCornersPassed();
+          this.cornerCount = 0;
+          this.lapFlag = false;
         }
       }
     }
   }
 
-  hitCorner(cornerCount, speedway){
-    var conditionX = ( (Math.abs(this.group.position.x) >= Math.abs(speedway.cornersX[cornerCount])*0.85)  && (Math.abs(this.group.position.x) <= Math.abs(speedway.cornersX[cornerCount])*1.15) );
-    var conditionZ = ( (Math.abs(this.group.position.z) >= Math.abs(speedway.cornersZ[cornerCount])*0.85)  && (Math.abs(this.group.position.z) <= Math.abs(speedway.cornersZ[cornerCount])*1.15) );
+  hitCorner(speedway){
+    console.log(this.cornerCount);
+    var conditionX;
+    var conditionZ;
+
+    //Different tests if corners are greater than 0 or less than zero
+
+    if((speedway.cornersX[this.cornerCount] >= -5) && (speedway.cornersX[this.cornerCount] <= 5)){
+      conditionX = (this.group.position.x >= -10 && this.group.position.x <=10);
+    }else{
+      if(speedway.cornersX[this.cornerCount] > 0){
+        conditionX = (this.group.position.x >= speedway.cornersX[this.cornerCount]*0.85) && (this.group.position.x <= speedway.cornersX[this.cornerCount]*1.15);
+      }else{
+        conditionX = ((this.group.position.x <= speedway.cornersX[this.cornerCount]*0.85) && (this.group.position.x >= speedway.cornersX[this.cornerCount]*1.15));
+      }
+    }
+
+    if((speedway.cornersZ[this.cornerCount] >= -5) && (speedway.cornersZ[this.cornerCount] <= 5)){
+      conditionZ = (this.group.position.z >= -10 && this.group.position.z <=10);
+    }else{
+      if(speedway.cornersZ[this.cornerCount] > 0){
+        conditionZ = (this.group.position.z >= speedway.cornersZ[this.cornerCount]*0.85) && (this.group.position.z <= speedway.cornersZ[this.cornerCount]*1.15);
+      }else{
+        conditionZ = (this.group.position.z <= speedway.cornersZ[this.cornerCount]*0.85) && (this.group.position.z >= speedway.cornersZ[this.cornerCount]*1.15);
+      }
+    }
+
     return conditionX && conditionZ;
   }
 
   hitFinishLine(speedway){
-    var conditionX =  ((Math.abs(this.group.position.x) >= Math.abs(speedway.xInitialBlock*0.85))  && (Math.abs(this.group.position.x) <= Math.abs(speedway.xInitialBlock*1.15) ));
-    var conditionZ = ((Math.abs(this.group.position.z) >= Math.abs(speedway.zInitialBlock*0.85))  && (Math.abs(this.group.position.z) <= Math.abs(speedway.zInitialBlock*1.15) ));
+    
+    var conditionX;
+    var conditionZ;
+
+    //Different tests if corners are greater than 0 or less than zero
+
+    if((speedway.xInitialBlock >= -5) && (speedway.xInitialBlock <= 5)){
+      conditionX = (this.group.position.x >= -10 && this.group.position.x <=10);
+    }else{
+      if(speedway.xInitialBlock > 0){
+        conditionX = (this.group.position.x >= speedway.xInitialBlock*0.85) && (this.group.position.x <= speedway.xInitialBlock[this.cornerCount]*1.15);
+      }else{
+        conditionX = ((this.group.position.x <= speedway.xInitialBlock[this.cornerCount]*0.85) && (this.group.position.x >= speedway.xInitialBlock[this.cornerCount]*1.15));
+      }
+    }
+
+    if((speedway.zInitialBlock >= -5) && (speedway.zInitialBlock <= 5)){
+      conditionZ = (this.group.position.z >= -10 && this.group.position.z <=10);
+    }else{
+      if(speedway.zInitialBlock > 0){
+        conditionZ = (this.group.position.z >= speedway.zInitialBlock*0.85) && (this.group.position.z <= speedway.zInitialBlock*1.15);
+      }else{
+        conditionZ = (this.group.position.z <= speedway.zInitialBlock*0.85) && (this.group.position.z >= speedway.zInitialBlock*1.15);
+      }
+    }
+
     return conditionX && conditionZ;
   }
 
-  hasPassedRightWay(pieceCount){
+  hasPassedRightWay(){ // auxiliar function that checks if the car passed all corners in the right sequence
     var rightWay = true;
-    for(var i=0; i<pieceCount; i++){
+    for(var i=0; i<this.cornerCount; i++){
       if(this.cornersPassed[i] == false){
         rightWay = false;
       }
     }
     return rightWay;
+  }
+
+  updateCornersPassed(){
+    for(var i=0; i<this.cornersPassed.length; i++){
+      this.cornersPassed[i] = false;
+    }
   }
 }
 

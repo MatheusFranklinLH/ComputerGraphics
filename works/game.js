@@ -18,11 +18,13 @@ var stats = new Stats();          // To show FPS information
 var scene = new THREE.Scene();    // Create main scene
 var renderer = initRenderer();    // View function in util/utils
 renderer.setClearColor("rgb(30, 30, 40)");
-//var camera = initCamera(new THREE.Vector3(0, -30, 15)); // Init camera in this position
 
-
-// Enable mouse rotation, pan, zoom etc.
-//var trackballControls = new TrackballControls( camera, renderer.domElement );
+//Stopwatch flags
+var startStopwatchFlag = true;
+var firstLapFlag = true;
+var secLapFlag = true;
+var thirdLapFlag = true;
+var fourthLapFlag = true;
 
 var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.lookAt(0, 0, 0);
@@ -46,9 +48,6 @@ window.addEventListener( 'resize', function(){onWindowResize(TrackballCamera, re
 // To use the keyboard
 var keyboard = new KeyboardState();
 
-// Show text information onscreen
-//showInformation();
-
 // Show axes (parameter is size of each axis)
 var axesHelper = new THREE.AxesHelper( 12 );
 scene.add( axesHelper );
@@ -57,23 +56,11 @@ scene.add( axesHelper );
 initDefaultBasicLight(scene, true);
 
 //Create the ground plane
-/*
-var planeGeometry = new THREE.PlaneGeometry(500, 500);
-planeGeometry.translate(-0.02, -0.02, -0.02); // To avoid conflict with the axeshelper
-var planeMaterial = new THREE.MeshBasicMaterial({
-    color: "rgba(0, 0, 255)",
-    side: THREE.DoubleSide,
-});
-var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-plane.position.set(0, 0, 0);
-plane.rotateX(degreesToRadians(-90));
-scene.add(plane);
-*/
 var plane = createGroundPlaneWired(600, 600, 50, 50); // width and height
 scene.add(plane);
 
 //Create Speedway
-var speedway = new Speedway(21, 1);
+var speedway = new Speedway(21, 2);
 speedway.blocks.forEach(function(block) {
   scene.add(block.block); //Adiciona na cena cada cube do array de blocos 
   scene.add(block.fundo); //Adiciona na cena o fundo de cada cube do array de blocos 
@@ -88,8 +75,9 @@ car.updateNumCorners(speedway);
 
 camera.position.set(car.group.position.x ,car.group.position.y + 80,80);
 
-//Create Stopwatch
+//Create Stopwatches
 var stopwatch = new Stopwatch();
+var swLaps = new Stopwatch();
 
 
 //Move
@@ -98,7 +86,14 @@ function keyboardUpdate() {
 
   keyboard.update();
 
-  if ( keyboard.pressed("up") )    car.group.translateZ(  1 );
+  if ( keyboard.pressed("up") ){
+    car.group.translateZ(  1 );
+    if(startStopwatchFlag){
+      stopwatch.start();
+      swLaps.start();
+      startStopwatchFlag = false;
+    }
+  }
   if ( keyboard.pressed("down") )  car.group.translateZ( -1 );
 
   var angle = degreesToRadians(10);
@@ -212,11 +207,33 @@ function cameraRenderer ()
 var stopwatchInfo = new LapInfo();
 function updateLapInfo() {
   stopwatchInfo.changeStopwatch(stopwatch.format);
-  stopwatchInfo.changeFirstLap("1º Lap: 00:00:00");
-  stopwatchInfo.changeSecLap("2º Lap: 00:00:00");
-  stopwatchInfo.changeThirdLap("3º Lap: 00:00:00");
-  stopwatchInfo.changeFourthLap("4º Lap: 00:00:00");
+  stopwatchInfo.changeLap("Lap: " + car.lap + "/4");
+
+  if((car.lap == 1) && firstLapFlag){
+    stopwatchInfo.add("Lap 1: " + swLaps.format);
+    swLaps.clear();
+    firstLapFlag = false;
+  }else {
+    if((car.lap == 2) && secLapFlag){
+      stopwatchInfo.add("Lap 2: " + swLaps.format);
+      swLaps.clear();
+      secLapFlag = false;
+    }else{
+      if((car.lap == 3) && thirdLapFlag){
+        stopwatchInfo.add("Lap 3: " + swLaps.format);
+        swLaps.clear();
+        thirdLapFlag = false;
+      }else{
+        if((car.lap == 4) && fourthLapFlag){
+          stopwatchInfo.add("Lap 4: " + swLaps.format);
+          swLaps.clear();
+          fourthLapFlag = false;
+        }
+      }
+    }
+  }
 }
+
 
 
 render();
