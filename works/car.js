@@ -145,24 +145,44 @@ export class Car{
     var conditionZ;
 
     //Different tests if corners are greater than 0 or less than zero
-
+    /*
     if((speedway.cornersX[this.cornerCount] >= -5) && (speedway.cornersX[this.cornerCount] <= 5)){
-      conditionX = (this.group.position.x >= -10 && this.group.position.x <=10);
+      conditionX = (this.group.position.x >= -30 && this.group.position.x <=30);
     }else{
       if(speedway.cornersX[this.cornerCount] > 0){
-        conditionX = (this.group.position.x >= speedway.cornersX[this.cornerCount]*0.85) && (this.group.position.x <= speedway.cornersX[this.cornerCount]*1.15);
+        conditionX = (this.group.position.x >= speedway.cornersX[this.cornerCount]*0.80) && (this.group.position.x <= speedway.cornersX[this.cornerCount]*1.20);
       }else{
-        conditionX = ((this.group.position.x <= speedway.cornersX[this.cornerCount]*0.85) && (this.group.position.x >= speedway.cornersX[this.cornerCount]*1.15));
+        conditionX = ((this.group.position.x <= speedway.cornersX[this.cornerCount]*0.80) && (this.group.position.x >= speedway.cornersX[this.cornerCount]*1.20));
       }
     }
 
     if((speedway.cornersZ[this.cornerCount] >= -5) && (speedway.cornersZ[this.cornerCount] <= 5)){
-      conditionZ = (this.group.position.z >= -10 && this.group.position.z <=10);
+      conditionZ = (this.group.position.z >= -30 && this.group.position.z <=30);
     }else{
       if(speedway.cornersZ[this.cornerCount] > 0){
-        conditionZ = (this.group.position.z >= speedway.cornersZ[this.cornerCount]*0.85) && (this.group.position.z <= speedway.cornersZ[this.cornerCount]*1.15);
+        conditionZ = (this.group.position.z >= speedway.cornersZ[this.cornerCount]*0.80) && (this.group.position.z <= speedway.cornersZ[this.cornerCount]*1.20);
       }else{
-        conditionZ = (this.group.position.z <= speedway.cornersZ[this.cornerCount]*0.85) && (this.group.position.z >= speedway.cornersZ[this.cornerCount]*1.15);
+        conditionZ = (this.group.position.z <= speedway.cornersZ[this.cornerCount]*0.80) && (this.group.position.z >= speedway.cornersZ[this.cornerCount]*1.20);
+      }
+    }*/
+
+    if((speedway.cornersX[this.cornerCount] >= -5) && (speedway.cornersX[this.cornerCount] <= 5)){
+      conditionX = (this.group.position.x >= -30 && this.group.position.x <=30);
+    }else{
+      if(speedway.cornersX[this.cornerCount] > 0){
+        conditionX = (this.group.position.x >= (speedway.cornersX[this.cornerCount] - speedway.blockSize)) && (this.group.position.x <= (speedway.cornersX[this.cornerCount] + speedway.blockSize));
+      }else{
+        conditionX = ((this.group.position.x <= (speedway.cornersX[this.cornerCount] + speedway.blockSize)) && (this.group.position.x >= (speedway.cornersX[this.cornerCount] - speedway.blockSize)));
+      }
+    }
+
+    if((speedway.cornersZ[this.cornerCount] >= -5) && (speedway.cornersZ[this.cornerCount] <= 5)){
+      conditionZ = (this.group.position.z >= -30 && this.group.position.z <=30);
+    }else{
+      if(speedway.cornersZ[this.cornerCount] > 0){
+        conditionZ = (this.group.position.z >= (speedway.cornersZ[this.cornerCount] - speedway.blockSize)) && (this.group.position.z <= (speedway.cornersZ[this.cornerCount] + speedway.blockSize));
+      }else{
+        conditionZ = (this.group.position.z <= (speedway.cornersZ[this.cornerCount] + speedway.blockSize)) && (this.group.position.z >= (speedway.cornersZ[this.cornerCount] - speedway.blockSize));
       }
     }
 

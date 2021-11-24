@@ -10,7 +10,7 @@ import {initRenderer,
         createGroundPlaneWired,
       degreesToRadians} from "../libs/util/util.js";
 
-import {LapInfo, Stopwatch, Speedway} from './enviroment.js';
+import {LapInfo, Stopwatch, Speedway, gameInfo} from './enviroment.js';
 import { Car} from './car.js';
     
 
@@ -25,6 +25,10 @@ var firstLapFlag = true;
 var secLapFlag = true;
 var thirdLapFlag = true;
 var fourthLapFlag = true;
+
+var gameIsOnFlag = true;
+
+var lapTimes = [];
 
 var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.lookAt(0, 0, 0);
@@ -70,10 +74,10 @@ speedway.blocks.forEach(function(block) {
 var car = new Car(1)
 scene.add(car.group);
 car.placeInitialPosition(speedway.sideSize);
-car.group.scale.set(0.2, 0.2, 0.2);
+car.group.scale.set(0.3, 0.3, 0.3);
 car.updateNumCorners(speedway);
 
-camera.position.set(car.group.position.x ,car.group.position.y + 80,80);
+camera.position.set(car.group.position.x +60 ,car.group.position.y + 60,60);
 
 //Create Stopwatches
 var stopwatch = new Stopwatch();
@@ -86,8 +90,8 @@ function keyboardUpdate() {
 
   keyboard.update();
 
-  if ( keyboard.pressed("up") ){
-    car.group.translateZ(  1 );
+  if ( keyboard.pressed("up")){
+    car.group.translateZ( 2 );
     if(startStopwatchFlag){
       stopwatch.start();
       swLaps.start();
@@ -190,7 +194,7 @@ function cameraFollow()
   var objectToFollow = car.group;
   var dir = new THREE.Vector3();
   car.group.getWorldDirection(dir);
-  camera.position.set(objectToFollow.position.x + dir.x*10, 80, objectToFollow.position.z + 80 + dir.z*10);
+  camera.position.set(objectToFollow.position.x + dir.x*10, 70, objectToFollow.position.z + 70 + dir.z*10);
   camera.lookAt(objectToFollow.position.x + dir.x*10, 0, objectToFollow.position.z +dir.z*10);
 }
 
@@ -211,21 +215,25 @@ function updateLapInfo() {
 
   if((car.lap == 1) && firstLapFlag){
     stopwatchInfo.add("Lap 1: " + swLaps.format);
+    lapTimes.push(swLaps.format);
     swLaps.clear();
     firstLapFlag = false;
   }else {
     if((car.lap == 2) && secLapFlag){
       stopwatchInfo.add("Lap 2: " + swLaps.format);
+      lapTimes.push(swLaps.format);
       swLaps.clear();
       secLapFlag = false;
     }else{
       if((car.lap == 3) && thirdLapFlag){
         stopwatchInfo.add("Lap 3: " + swLaps.format);
+        lapTimes.push(swLaps.format);
         swLaps.clear();
         thirdLapFlag = false;
       }else{
         if((car.lap == 4) && fourthLapFlag){
           stopwatchInfo.add("Lap 4: " + swLaps.format);
+          lapTimes.push(swLaps.format);
           swLaps.clear();
           fourthLapFlag = false;
         }
@@ -234,18 +242,32 @@ function updateLapInfo() {
   }
 }
 
+function isGameOver(){
+  if(car.lap == 4){
+    gameOverInf();
+    gameIsOnFlag = false;
+
+  }
+}
+
+var gameOverInfo = new gameInfo();
+function gameOverInf(){
+  gameOverInfo.add("Total time : " + stopwatch.format);
+  stopwatch.stop();
+  gameOverInfo.show();
+}
 
 
 render();
 function render()
 {
   stats.update(); // Update FPS
-  //trackballControls.update(); // Enable mouse movements
-  keyboardUpdate();
+  isGameOver();
   updateLapInfo();
-  console.log(car.isOnTheSpeedway(speedway));
-  car.movement(speedway);
-  //console.log(car.lap);
+  if(gameIsOnFlag){
+    keyboardUpdate();
+    car.movement(speedway);
+  }
   cameraControl();
   requestAnimationFrame(render);
   cameraRenderer(); // Render scene 
