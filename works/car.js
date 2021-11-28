@@ -2,14 +2,26 @@ import * as THREE from '../../build/three.module.js';
 import {degreesToRadians} from "../libs/util/util.js";
 
 export class Car{
-  constructor(type, numSides){
+  constructor(type){
     
     this.group = new THREE.Group();
     this.lap = 0;
     this.cornersPassed = [false];
     this.cornerCount = 0;
     this.lapFlag = true;
-    for(var i=1; i<numSides; i++) this.speedwaySides.push(false);
+
+    
+    //Movement
+
+    this.velocity = 0;
+    this.acceleration = 0.05;
+    this.maxVel = 1.5;
+    this.track;
+    this.slow = -0.05;
+
+
+    // Structure:
+
     if(type == 1){
       this.body = createCube(5.0, 15.0, 3.0, 20.0, 20.0, 20.0, false);
       this.ceiling = createCube(5.0, 6.0, 2.0, 20, 20, 20, false); 
@@ -139,32 +151,11 @@ export class Car{
     }
   }
 
+  //Different tests if corners are greater than 0 or less than zero
   hitCorner(speedway){
     console.log(this.cornerCount);
     var conditionX;
     var conditionZ;
-
-    //Different tests if corners are greater than 0 or less than zero
-    /*
-    if((speedway.cornersX[this.cornerCount] >= -5) && (speedway.cornersX[this.cornerCount] <= 5)){
-      conditionX = (this.group.position.x >= -30 && this.group.position.x <=30);
-    }else{
-      if(speedway.cornersX[this.cornerCount] > 0){
-        conditionX = (this.group.position.x >= speedway.cornersX[this.cornerCount]*0.80) && (this.group.position.x <= speedway.cornersX[this.cornerCount]*1.20);
-      }else{
-        conditionX = ((this.group.position.x <= speedway.cornersX[this.cornerCount]*0.80) && (this.group.position.x >= speedway.cornersX[this.cornerCount]*1.20));
-      }
-    }
-
-    if((speedway.cornersZ[this.cornerCount] >= -5) && (speedway.cornersZ[this.cornerCount] <= 5)){
-      conditionZ = (this.group.position.z >= -30 && this.group.position.z <=30);
-    }else{
-      if(speedway.cornersZ[this.cornerCount] > 0){
-        conditionZ = (this.group.position.z >= speedway.cornersZ[this.cornerCount]*0.80) && (this.group.position.z <= speedway.cornersZ[this.cornerCount]*1.20);
-      }else{
-        conditionZ = (this.group.position.z <= speedway.cornersZ[this.cornerCount]*0.80) && (this.group.position.z >= speedway.cornersZ[this.cornerCount]*1.20);
-      }
-    }*/
 
     if((speedway.cornersX[this.cornerCount] >= -5) && (speedway.cornersX[this.cornerCount] <= 5)){
       conditionX = (this.group.position.x >= -30 && this.group.position.x <=30);
@@ -234,8 +225,115 @@ export class Car{
       this.cornersPassed[i] = false;
     }
   }
+
+  //Movement
+
+  accelerate(dir, speedway){
+    this.track = this.isOnTheSpeedway(speedway);
+    var topVel = this.track ? this.maxVel : this.maxVel*0.5;
+    if (Math.abs(this.velocity) < topVel)
+    {
+      this.velocity += this.acceleration*dir;
+    }
+    else
+    {
+      this.velocity += -dir*this.acceleration;
+    }
+
+  }
+
+  slowdown()
+    {
+      if (this.velocity > 0.1)
+      this.velocity += this.slow;
+      else if (this.velocity < -0.1)
+      this.velocity += -this.slow;
+      else
+      this.velocity = 0;
+    }
+
+    goLeft(angle)
+  {
+    this.roda1.matrixAutoUpdate = false;
+    this.roda2.matrixAutoUpdate = false;
+    this.axis1.matrixAutoUpdate = false;
+
+    this.group.rotateY(  angle );
+
+    var mat4 = new THREE.Matrix4();
+
+    this.roda1.matrix.identity();
+    this.roda2.matrix.identity();
+    this.axis1.matrix.identity();
+
+    this.axis1.matrix.multiply(mat4.makeRotationY( degreesToRadians(5)));
+    this.axis1.matrix.multiply(mat4.makeRotationZ( degreesToRadians(90)));
+    this.axis1.matrix.multiply(mat4.makeTranslation(-1.0, 0.0, 4.0));
+
+    this.roda1.matrix.multiply(mat4.makeRotationY( degreesToRadians(-50)));
+    this.roda1.matrix.multiply(mat4.makeTranslation(5.5, -1.0, -1.0));
+
+    this.roda2.matrix.multiply(mat4.makeRotationY( degreesToRadians(-50)));
+    this.roda2.matrix.multiply(mat4.makeTranslation(1.0, -1.0, 5.5));
+  }
+
+  stop()
+  {
+    this.roda1.matrixAutoUpdate = false;
+    this.roda2.matrixAutoUpdate = false;
+    this.axis1.matrixAutoUpdate = false;
+
+    var mat4 = new THREE.Matrix4();
+
+    this.roda1.matrix.identity();
+    this.roda2.matrix.identity();
+    this.axis1.matrix.identity();
+
+    this.axis1.matrix.multiply(mat4.makeRotationY( degreesToRadians(-5)));
+    this.axis1.matrix.multiply(mat4.makeRotationZ( degreesToRadians(-90)));
+    this.axis1.matrix.multiply(mat4.makeTranslation(1.0, 0.5, 4.0));
+
+    this.roda1.matrix.multiply(mat4.makeRotationY( degreesToRadians(90)));
+    this.roda1.matrix.multiply(mat4.makeTranslation(-4.0, -1.0, 3.5));
+
+    this.roda2.matrix.multiply(mat4.makeRotationY( degreesToRadians(90)));
+    this.roda2.matrix.multiply(mat4.makeTranslation(-4.0, -1.0,-3.5));
+  }
+
+  goRight(angle){
+    this.roda1.matrixAutoUpdate = false;
+    this.roda2.matrixAutoUpdate = false;
+    this.axis1.matrixAutoUpdate = false;
+
+    this.group.rotateY( -angle );
+
+
+    var mat4 = new THREE.Matrix4();
+
+    this.roda1.matrix.identity();
+    this.roda2.matrix.identity();
+    this.axis1.matrix.identity();
+
+    this.axis1.matrix.multiply(mat4.makeRotationY( degreesToRadians(-10)));
+    this.axis1.matrix.multiply(mat4.makeRotationZ( degreesToRadians(90)));
+    this.axis1.matrix.multiply(mat4.makeTranslation(-1.0, -0.5, 4.0));
+
+    this.roda1.matrix.multiply(mat4.makeRotationY( degreesToRadians(50)));
+    this.roda1.matrix.multiply(mat4.makeTranslation(-5.5, -1.0, 0.0));
+
+    this.roda2.matrix.multiply(mat4.makeRotationY( degreesToRadians(50)));
+    this.roda2.matrix.multiply(mat4.makeTranslation(-1.0, -1.0, 5.5));
+  }
+
 }
 
+
+
+
+
+
+
+//Strucuture
 
 function createCube(width, height, depth, widthSegments, heightSegments, depthSegments, color)
 {

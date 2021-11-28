@@ -262,8 +262,8 @@ export class gameInfo{
         this.infoBox.id = "InfoxBox";
         this.infoBox.style.padding = "6px 14px";
         this.infoBox.style.position = "fixed";
-        //this.infoBox.style.bottom = "0";
-        //this.infoBox.style.right = "0";
+        this.infoBox.style.bottom = "0";
+        this.infoBox.style.right = "0";
         this.infoBox.style.backgroundColor = "rgba(255,255,255,0.7)";
         this.infoBox.style.color = "white";
         this.infoBox.style.fontFamily = "sans-serif";
@@ -286,96 +286,3 @@ export class gameInfo{
         document.body.appendChild(this.infoBox);
       }
 }
-
-/*export function finishLap(blocks) {
-    var finishedLap = true;
-    blocks.forEach(function(block){
-        if(block.passedBy == false)
-        finishedLap = false;
-    })
-    return finishedLap;
-}*/
-/*
-export function createTrack1(numBlocksPerSide) 
-{
-    var xPos = 0;
-    var yPos = - (numBlocksPerSide*10)/2;
-    var zPos = 0.1;
-    var track = [new Block(xPos, yPos, zPos, true)];
-
-    for(var i= 1; i<numBlocksPerSide/2; i++){
-        xPos -= 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-
-    for(var i =1; i<numBlocksPerSide; i++){
-        yPos += 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-
-    for(var i =1; i<numBlocksPerSide; i++){
-        xPos += 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-
-    for(var i =1; i<numBlocksPerSide; i++){
-        yPos -= 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-
-    for(var i =2; i<numBlocksPerSide/2; i++){
-        xPos -= 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-    if(numBlocksPerSide%2 == 0){
-        xPos -= 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-
-    return track;
-}
-
-export function createTrack2(numBlocksPerSide) 
-{
-    var xPos = 0;
-    var yPos = - (numBlocksPerSide*10)/2;
-    var zPos = 0.1;
-    var track = [new Block(xPos, yPos, zPos, true)];
-    
-    for(var i =1; i<numBlocksPerSide/2; i++){
-        xPos -= 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-    
-    for(var i =1; i<numBlocksPerSide; i++){
-        yPos += 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-
-    for(var i =1; i<numBlocksPerSide/2; i++){
-        xPos += 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-
-    for(var i =1; i<numBlocksPerSide/2; i++){
-        yPos -= 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-
-    for(var i =1; i<numBlocksPerSide/2; i++){
-        xPos += 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-
-    for(var i =1; i<numBlocksPerSide/2; i++){
-        yPos -= 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-
-    for(var i =2; i<numBlocksPerSide/2; i++){
-        xPos -= 10;
-        track.push(new Block(xPos, yPos, zPos, false));
-    }
-
-    return track;
-}*/

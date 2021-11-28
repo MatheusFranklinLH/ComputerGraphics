@@ -4,8 +4,6 @@ import {GUI} from       '../build/jsm/libs/dat.gui.module.js';
 import {TrackballControls} from '../build/jsm/controls/TrackballControls.js';
 import KeyboardState from '../libs/util/KeyboardState.js';
 import {initRenderer,
-        InfoBox, 
-        initCamera,
         initDefaultBasicLight,
         createGroundPlaneWired,
       degreesToRadians} from "../libs/util/util.js";
@@ -53,8 +51,8 @@ window.addEventListener( 'resize', function(){onWindowResize(TrackballCamera, re
 var keyboard = new KeyboardState();
 
 // Show axes (parameter is size of each axis)
-var axesHelper = new THREE.AxesHelper( 12 );
-scene.add( axesHelper );
+//var axesHelper = new THREE.AxesHelper( 12 );
+//scene.add( axesHelper );
 
 //Light
 initDefaultBasicLight(scene, true);
@@ -90,47 +88,41 @@ function keyboardUpdate() {
 
   keyboard.update();
 
+  var direction = 0;
+
   if ( keyboard.pressed("up")){
-    car.group.translateZ( 2 );
+    direction = 1;
+    car.accelerate(direction, speedway);
+
     if(startStopwatchFlag){
       stopwatch.start();
       swLaps.start();
       startStopwatchFlag = false;
     }
   }
-  if ( keyboard.pressed("down") )  car.group.translateZ( -1 );
+  if ( keyboard.pressed("down") )
+  {
+    direction = -1;
+    car.accelerate(direction, speedway);
+  }
 
-  var angle = degreesToRadians(10);
+  var angle = degreesToRadians(3);
   if ( keyboard.pressed(",") )  car.group.rotateY(  angle );
   if ( keyboard.pressed(".") ) car.group.rotateY( -angle );
 
   if ( keyboard.pressed("left") ){
-    car.roda1.rotateY( angle);
-    car.roda2.rotateY( angle);
+    car.goLeft(direction*angle);
+  }else{
+    car.stop();
   }
   if ( keyboard.pressed("right") ){
-   car.roda1.rotateY( -angle);
-   car.roda2.rotateY( -angle);
+   car.goRight(direction*angle);
   }
 
-  //Cronometro
-  if(keyboard.down("P")) stopwatch.pause();
-  if(keyboard.down("I")) stopwatch.start();
-  if(keyboard.down("O")) stopwatch.stop();
-  
-}
 
-function showInformation()
-{
-  // Use this to show information onscreen
-  var controls = new InfoBox();
-    controls.add("Car Model");
-    controls.addParagraph();
-    controls.add("Use mouse to rotate/pan/zoom the camera");
-    controls.add("Up / Back arrow to walk");
-    controls.add("Left / Right arrow to turn the wheels");
-    controls.add("Press ',' and '.' to rotate in place")
-    controls.show();
+  if(direction == 0)  car.slowdown();
+  car.group.translateZ(car.velocity);
+
 }
 
 //Camera
@@ -244,7 +236,7 @@ function updateLapInfo() {
 
 function isGameOver(){
   if(car.lap == 4){
-    gameOverInf();
+    if(gameIsOnFlag)  gameOverInf();
     gameIsOnFlag = false;
 
   }
@@ -254,20 +246,22 @@ var gameOverInfo = new gameInfo();
 function gameOverInf(){
   gameOverInfo.add("Total time : " + stopwatch.format);
   stopwatch.stop();
+  for(var i=0; i < lapTimes.length; i++){
+    gameOverInfo.add((i+1) + "º lap: " + lapTimes[i]);
+  }
   gameOverInfo.show();
 }
-
 
 render();
 function render()
 {
   stats.update(); // Update FPS
-  isGameOver();
-  updateLapInfo();
   if(gameIsOnFlag){
     keyboardUpdate();
     car.movement(speedway);
   }
+  updateLapInfo();
+  isGameOver();
   cameraControl();
   requestAnimationFrame(render);
   cameraRenderer(); // Render scene 
