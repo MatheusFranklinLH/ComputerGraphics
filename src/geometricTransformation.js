@@ -27,7 +27,7 @@ var keyboard = new KeyboardState();
 var trackballControls = new TrackballControls( camera, renderer.domElement );
 
 // Show axes (parameter is size of each axis)
-var axesHelper = new THREE.AxesHelper( 12 ); //Adiciona o eixo dos elementos
+var axesHelper = new THREE.AxesHelper( 12 );
 scene.add( axesHelper );
 
 // create the ground plane
